@@ -4,7 +4,7 @@ library(reactable)
 library(tibble)
 library(htmltools)
 library(magrittr)
-library(tidyverse)
+library(dplyr)
 make_color_pal <- function(colors, bias = 1) {
   get_color <- colorRamp(colors, bias = bias)
   function(x) rgb(get_color(x), maxColorValue = 255)
@@ -117,6 +117,7 @@ h1 {
 ),
 tabPanel("Assists", 
          width=510,
+         downloadButton("downloadData2", "Download CSV"),
          reactableOutput("dashboard_players_two", width = "auto", height = "auto",
                          inline = FALSE)
 ))))
@@ -128,13 +129,20 @@ server <- function(input, output) {
   
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste("players.csv")
+      paste("Shots.csv")
     },
     content = function(file) {
       write.csv(players, file, row.names = FALSE)
     }
   )
-  
+  output$downloadData2 <- downloadHandler(
+    filename = function() {
+      paste("assists.csv")
+    },
+    content = function(file) {
+      write.csv(players_two, file, row.names = FALSE)
+    }
+  )
   
   output$dashboard <- renderReactable({
     reactable(
@@ -377,7 +385,7 @@ server <- function(input, output) {
                   }
                 ),
                 Assists = colDef(
-                  maxWidth = 60,
+                  maxWidth = 70,
                   format = colFormat(digits = 0),
                   style = function(value) {
                     normalized <- (value - min(players_two$Assists)) / (max(players_two$Assists) - min(players_two$Assists))
@@ -389,7 +397,7 @@ server <- function(input, output) {
                 xG_assisted = colDef(
                   name = "xG Assisted",
                   format = colFormat(digits = 2),
-                  maxWidth = 55,
+                  maxWidth = 75,
                   style = function(value) {
                     normalized <- (value - min(players_two$xG_assisted)) / (max(players_two$xG_assisted) - min(players_two$xG_assisted))
                     color <- knockout_pct_color(normalized)
@@ -397,7 +405,7 @@ server <- function(input, output) {
                   }),
                 xA.90 = colDef(
                   name = "xA/90",
-                  maxWidth = 55,
+                  maxWidth = 70,
                   style = function(value) {
                     normalized <- (value - min(players_two$xA.90)) / (max(players_two$xA.90) - min(players_two$xA.90))
                     color <- knockout_pct_color(normalized)
@@ -405,7 +413,7 @@ server <- function(input, output) {
                   }),
                 Shots_assisted = colDef(
                   name = "Shots Assisted",
-                  maxWidth = 55,
+                  maxWidth = 75,
                   format = colFormat(digits = 0),
                   style = function(value) {
                     normalized <- (value - min(players_two$Shots_assisted)) / (max(players_two$Shots_assisted) - min(players_two$Shots_assisted))
